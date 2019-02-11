@@ -50,6 +50,7 @@ implements Map<String, Object> {
     public static final String ALWAYS_IGNORE_FIRST_KEY = "AlwaAa^Ay)i)zIgG%boZElA";
     public static final String UNKNOWN_TO_LITERAL_KEY = "UuUkwWn2LlLte*(9l";
     public static final String CAST_PRIMITIVES_KEY = "H^7yCa3TtH***";
+    public static final String OBJECT_CONSTRUCTOR_KEY = OgnlContext.class.getName()+"_OBJECT_CONSTRUCTOR_KEY"; 
     public static final String CONTEXT_CONTEXT_KEY = "context";
     public static final String ROOT_CONTEXT_KEY = "root";
     public static final String THIS_CONTEXT_KEY = "this";
@@ -59,7 +60,6 @@ implements Map<String, Object> {
     public static final String CLASS_RESOLVER_CONTEXT_KEY = "_classResolver";
     public static final String TYPE_CONVERTER_CONTEXT_KEY = "_typeConverter";
     public static final String MEMBER_ACCESS_CONTEXT_KEY = "_memberAccess";
-    private static final String PROPERTY_KEY_PREFIX = "ognl";
     private static boolean defaultTraceEvaluations = false;
     private static boolean defaultKeepLastEvaluation = false;
     public static final DefaultClassResolver DEFAULT_CLASS_RESOLVER = new DefaultClassResolver();

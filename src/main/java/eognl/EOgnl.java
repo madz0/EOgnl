@@ -3,26 +3,10 @@
  */
 package eognl;
 
-import eognl.ClassResolver;
-import eognl.EOgnlContext;
-import eognl.EOgnlRuntime;
-import eognl.Evaluation;
-import eognl.ExpressionSyntaxException;
-import eognl.MemberAccess;
-import eognl.Node;
-import eognl.OgnlContext;
-import eognl.OgnlException;
-import eognl.OgnlParser;
-import eognl.ParseException;
-import eognl.SimpleNode;
-import eognl.TokenMgrError;
-import eognl.TypeConverter;
+import java.io.StringReader;
+
 import eognl.enhance.ExpressionAccessor;
 import eognl.exinternal.util.MutableInt;
-import java.io.Reader;
-import java.io.StringReader;
-import java.lang.reflect.Member;
-import java.util.Map;
 
 public abstract class EOgnl {
     public static Object parseExpression(String expression) throws OgnlException {
@@ -90,24 +74,25 @@ public abstract class EOgnl {
             result.setMemberAccess(memberAccess);
         }
         result.setRoot(root);
-        MutableInt mInt = (MutableInt)result.get("H0ldZzZz2@Id*4Cain");
+        MutableInt mInt = (MutableInt)result.get(OgnlContext.CURRENT_INDEX_KEY);
         if (mInt != null) {
             StringBuffer key = null;
+            //TODO I don't remember why this should be 5 more!
             for (int i = 0; i < mInt.get() + 5; ++i) {
                 key = new StringBuffer();
-                key.append("R3PpeZzenGnr#iK?").append(String.valueOf(i));
+                key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(i));
                 result.remove(key.toString());
                 key = new StringBuffer();
-                key.append("R3PpeZzenArrAayS3etEEer#iK?").append(String.valueOf(i));
+                key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(String.valueOf(i));
                 result.remove(key.toString());
             }
         }
-        result.put("H0ldZzZz2@Id*4Cain", (Object)new MutableInt());
+        result.put(OgnlContext.CURRENT_INDEX_KEY, (Object)new MutableInt());
         result.remove(OgnlContext.EXPANDED_ARRAY_KEY);
-        Object root_param_info = context.get("PaArmRoo#eZInfo&r?");
+        Object root_param_info = context.get(OgnlContext.PARAMETERIZED_ROOT_TYPE_KEY);
         if (root_param_info != null) {
             StringBuffer key = new StringBuffer();
-            key.append("R3PpeZzenGnr#iK?").append(String.valueOf(1));
+            key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(1));
             context.put(key.toString(), root_param_info);
         }
         return result;

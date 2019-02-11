@@ -98,9 +98,9 @@ public class EOgnlRuntime {
     private static ExPrimitiveType exPrimitiveType;
     private static ExPrimitiveDefaults exPrimitiveDefults;
     private static PrimitiveWrapperType primitiveWrapperType;
-    public static final String EXPAND_SIZE_KEY = "NaIndIdIdx@Id*4Lis";
-    public static final String GENERIC_PREFIX_KEY = "R3PpeZzenGnr#iK?";
-    public static final String ARRAR_SOURCE_PREFIX_KEY = "R3PpeZzenArrAayS3etEEer#iK?";
+    public static final String EXPAND_SIZE_KEY = OgnlContext.EXPAND_SIZE_KEY;
+    public static final String GENERIC_PREFIX_KEY = OgnlContext.GENERIC_PREFIX_KEY;
+    public static final String ARRAR_SOURCE_PREFIX_KEY = OgnlContext.ARRAR_SOURCE_PREFIX_KEY;
     public static final String EXPANDED_ARRAY_KEY = OgnlContext.EXPANDED_ARRAY_KEY;
 
     static {
@@ -1206,11 +1206,11 @@ public class EOgnlRuntime {
     }
 
     public static int incIndex(OgnlContext context) {
-        return ((MutableInt)context.get("H0ldZzZz2@Id*4Cain")).incGet();
+        return ((MutableInt)context.get(OgnlContext.CURRENT_INDEX_KEY)).incGet();
     }
 
     public static int decIndex(OgnlContext context) {
-        return ((MutableInt)context.get("H0ldZzZz2@Id*4Cain")).decGet();
+        return ((MutableInt)context.get(OgnlContext.CURRENT_INDEX_KEY)).decGet();
     }
 
     public static boolean isSetChain(OgnlContext context) {
@@ -1226,25 +1226,26 @@ public class EOgnlRuntime {
     }
 
     public static boolean isUnknownInited(OgnlContext context) {
-        return context.get("SZudINIi#^n{[knwn!en#ul4Cain") != null;
+        return context.get(OgnlContext.INIT_UNKNOWN_NULLS_KEY) != null;
     }
 
     public static boolean isFirstUnknownIgnored(OgnlContext context) {
-        return context.get("IgG%boZer7&is94E3") != null;
+        return context.get(OgnlContext.IGNORE_FIRST_UNKNOWN_KEY) != null;
     }
 
     public static boolean isFirstAlwaysIgnored(OgnlContext context) {
-        return context.get("AlwaAa^Ay)i)zIgG%boZElA") != null;
+        return context.get(OgnlContext.ALWAYS_IGNORE_FIRST_KEY) != null;
     }
 
     public static boolean isUnknownIsLiteral(OgnlContext context) {
-        return context.get("UuUkwWn2LlLte*(9l") != null;
+        return context.get(OgnlContext.UNKNOWN_TO_LITERAL_KEY) != null;
     }
 
     public static boolean isPrimitivesCasted(OgnlContext context) {
-        return context.get("H^7yCa3TtH***") != null;
+        return context.get(OgnlContext.CAST_PRIMITIVES_KEY) != null;
     }
 
+    @Deprecated
     public static Object createProperObject(Class<?> cls, Class<?> componentType) throws InstantiationException, IllegalAccessException {
         if (List.class.isAssignableFrom(cls)) {
             if (LinkedList.class.isAssignableFrom(cls)) {

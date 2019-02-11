@@ -93,7 +93,7 @@ implements PropertyAccessor {
                             throw new OgnlException("Could not determine component type of the Array");
                         }
                         try {
-                            value = this.createProperObject(cls, cls.getComponentType());
+                            value = this.createProperObject(context, cls, cls.getComponentType());
                             Array.set(target, i, value);
                             return value;
                         }
@@ -121,7 +121,7 @@ implements PropertyAccessor {
                     Object new_array = Array.newInstance(component_type, i + 1);
                     System.arraycopy(target, 0, new_array, 0, len);
                     try {
-                        result = this.createProperObject(component_type, component_type.getComponentType());
+                        result = this.createProperObject(context, component_type, component_type.getComponentType());
                         Array.set(new_array, i, result);
                         this.setExpandedArray(context, new_array, i, level, true);
                         return result;
@@ -179,7 +179,7 @@ implements PropertyAccessor {
 
     private void setExpandedArray(OgnlContext context, Object array, int index, int level, boolean can_save) {
         StringBuffer key = new StringBuffer();
-        key.append("R3PpeZzenArrAayS3etEEer#iK?").append(String.valueOf(level));
+        key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(String.valueOf(level));
         ArraySourceContainer setterContainer = (ArraySourceContainer)context.get(String.valueOf(key.toString()));
         if (setterContainer != null) {
             Object source = setterContainer.getSourece();
@@ -211,7 +211,7 @@ implements PropertyAccessor {
                 }
             }
             key = new StringBuffer();
-            key.append("R3PpeZzenArrAayS3etEEer#iK?").append(String.valueOf(level + 1));
+            key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(String.valueOf(level + 1));
             context.put(key.toString(), (Object)setterContainer);
         } else if (context.getRoot().getClass().isArray()) {
             context.put(OgnlContext.EXPANDED_ARRAY_KEY, array);

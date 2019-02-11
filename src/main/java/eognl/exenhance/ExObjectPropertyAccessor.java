@@ -9,6 +9,7 @@ import eognl.OgnlContext;
 import eognl.OgnlException;
 import eognl.PropertyAccessor;
 import eognl.exinternal.util.ArraySourceContainer;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -70,7 +71,7 @@ implements PropertyAccessor {
             if (value != null) {
                 return value;
             }
-            value = this.createProperObject(cls, componentType);
+            value = this.createProperObject(context, cls, componentType);
             if (this.setPossibleProperty(context, target, (String)name, value) != EOgnlRuntime.NotFound) return value;
             StringBuffer sb = new StringBuffer();
             sb.append("Could not set value ").append(value).append(" with property ").append(name).append(" to ").append(target.getClass());
@@ -145,7 +146,7 @@ implements PropertyAccessor {
                 return;
             }
             StringBuffer key = new StringBuffer();
-            key.append("R3PpeZzenGnr#iK?").append(String.valueOf(level + 1));
+            key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level + 1));
             context.put(key.toString(), (Object)genericTypes);
         } else if (genericTypes[0] instanceof GenericArrayType) {
             GenericArrayType genericArrayType = (GenericArrayType)genericTypes[0];
@@ -165,18 +166,19 @@ implements PropertyAccessor {
                 return;
             }
             StringBuffer key = new StringBuffer();
-            key.append("R3PpeZzenGnr#iK?").append(String.valueOf(level + 2));
+            key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level + 2));
             context.put(key.toString(), (Object)genericTypes);
         }
     }
 
-    public Object createProperObject(Class<?> cls, Class<?> componentType) throws InstantiationException, IllegalAccessException {
-        return EOgnlRuntime.createProperObject(cls, componentType);
+    public Object createProperObject(OgnlContext context, Class<?> cls, Class<?> componentType)
+        throws InstantiationException, IllegalAccessException {
+      return ((ObjectConstructor)context.get(OgnlContext.OBJECT_CONSTRUCTOR_KEY)).createObject(cls, componentType);
     }
 
     public void keepArraySource(OgnlContext context, Object target, String propertyName, int level) {
         StringBuffer key = new StringBuffer();
-        key.append("R3PpeZzenArrAayS3etEEer#iK?").append(String.valueOf(level + 1));
+        key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(String.valueOf(level + 1));
         ArraySourceContainer a = new ArraySourceContainer();
         a.setSetterName(propertyName);
         a.setTarget(target);
@@ -199,11 +201,11 @@ implements PropertyAccessor {
 
     public void shiftGenericParameters(OgnlContext context, int level) {
         StringBuffer key = new StringBuffer();
-        key.append("R3PpeZzenGnr#iK?").append(String.valueOf(level));
+        key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level));
         Type[] genericParameterTypes = (Type[])context.get(key.toString());
         if (genericParameterTypes != null && genericParameterTypes.length > 0) {
             key = new StringBuffer();
-            key.append("R3PpeZzenGnr#iK?").append(String.valueOf(level + 1));
+            key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level + 1));
             context.put(key.toString(), (Object)genericParameterTypes);
         }
     }
@@ -217,7 +219,7 @@ implements PropertyAccessor {
         if (this.getGenericArgumentsCount() < 1 || paramIndex < 0) {
             return null;
         }
-        StringBuffer key = new StringBuffer().append("R3PpeZzenGnr#iK?").append(String.valueOf(level));
+        StringBuffer key = new StringBuffer().append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level));
         Type[] genericParameterTypes = (Type[])context.get(key.toString());
         if (genericParameterTypes == null || genericParameterTypes.length < this.getGenericArgumentsCount() || genericParameterTypes.length <= paramIndex) {
             return null;
@@ -225,7 +227,7 @@ implements PropertyAccessor {
         if (genericParameterTypes instanceof Class[] && (next_classes_len = genericParameterTypes.length - this.getGenericArgumentsCount()) > 0) {
             Class[] classes = new Class[next_classes_len];
             System.arraycopy(genericParameterTypes, this.getGenericArgumentsCount(), classes, 0, next_classes_len);
-            key = new StringBuffer().append("R3PpeZzenGnr#iK?").append(String.valueOf(level + 1));
+            key = new StringBuffer().append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level + 1));
             context.put(key.toString(), (Object)classes);
             return (Class)genericParameterTypes[paramIndex];
         }
@@ -238,14 +240,14 @@ implements PropertyAccessor {
         if (genericParameterTypes == null || genericParameterTypes.length == 0) {
             return myCls;
         }
-        key = new StringBuffer().append("R3PpeZzenGnr#iK?").append(String.valueOf(level + 1));
+        key = new StringBuffer().append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level + 1));
         context.put(key.toString(), (Object)genericParameterTypes);
         return myCls;
     }
 
     public void keepArraySource(OgnlContext context, Object target, int index, int level) {
         StringBuffer key = new StringBuffer();
-        key.append("R3PpeZzenArrAayS3etEEer#iK?").append(String.valueOf(level + 1));
+        key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(String.valueOf(level + 1));
         ArraySourceContainer a = new ArraySourceContainer();
         a.setIndex(index);
         a.setTarget(target);

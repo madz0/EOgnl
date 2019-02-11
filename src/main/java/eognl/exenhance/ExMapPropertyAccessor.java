@@ -63,7 +63,7 @@ implements PropertyAccessor {
                     }
                     Class cls = (Class)clsObj;
                     try {
-                        result = this.createProperObject(cls, cls.getComponentType());
+                        result = this.createProperObject(context, cls, cls.getComponentType());
                         if (cls.isArray()) {
                             this.keepArraySource(context, target, (String)name, level);
                         }
@@ -93,7 +93,7 @@ implements PropertyAccessor {
                 }
                 Class cls = (Class)clsObj;
                 try {
-                    result = this.createProperObject(cls, cls.getComponentType());
+                    result = this.createProperObject(context, cls, cls.getComponentType());
                     if (cls.isArray()) {
                         this.keepArraySource(context, target, (String)name, level);
                     }
