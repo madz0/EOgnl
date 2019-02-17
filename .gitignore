@@ -1,6 +1,10 @@
+#eclipse
 .classpath
 .project
 .settings
+
+#intellij
+.idea
+
+#maven
 target
-!src/main/resources/db/changelog/.gitkeep
-src/main/resources/db/changelog/*

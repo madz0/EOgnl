@@ -115,6 +115,8 @@ OrderedReturn {
     @Override
     protected void setValueBody(OgnlContext context, Object target, Object value) throws OgnlException {
         boolean handled = false;
+        Object lastTarget = null;
+        Node lastNode = null;
         context.put(OgnlContext.EXPRESSION_SET, value);
         int ilast = this.children.length - 2;
         for (int i = 0; i <= ilast; ++i) {
@@ -165,10 +167,13 @@ OrderedReturn {
                 }
             }
             if (handled) continue;
-            target = this.children[i].getValue(context, target);
+            lastTarget = target;
+            lastNode = this.children[i];
+            target = lastNode.getValue(context, lastTarget);
         }
         if (!handled) {
             this.children[this.children.length - 1].setValue(context, target, value);
+            lastNode.getValue(context, lastTarget);
         }
     }
 

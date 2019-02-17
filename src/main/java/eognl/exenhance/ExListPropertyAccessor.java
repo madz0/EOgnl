@@ -9,14 +9,15 @@ import eognl.OgnlContext;
 import eognl.OgnlException;
 import eognl.PropertyAccessor;
 import eognl.exenhance.ExObjectPropertyAccessor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 public class ExListPropertyAccessor
-extends ExObjectPropertyAccessor
-implements PropertyAccessor {
+        extends ExObjectPropertyAccessor
+        implements PropertyAccessor {
     @Override
     public Object getProperty(OgnlContext context, Object target, Object name) throws OgnlException {
         int level = this.incIndex(context);
@@ -24,7 +25,7 @@ implements PropertyAccessor {
             this.shiftGenericParameters(context, level);
             return target;
         }
-        List list = (List)target;
+        List list = (List) target;
         if (name instanceof String) {
             Object result = null;
             if ("size".equals(name)) {
@@ -49,7 +50,7 @@ implements PropertyAccessor {
         boolean isnullInited = this.isNullInited(context);
         if (name instanceof DynamicSubscript) {
             int len = list.size();
-            switch (((DynamicSubscript)name).getFlag()) {
+            switch (((DynamicSubscript) name).getFlag()) {
                 case 0: {
                     if (!isChained) {
                         return len > 0 ? list.get(0) : null;
@@ -77,7 +78,7 @@ implements PropertyAccessor {
             }
         }
         if (name instanceof Number) {
-            index = ((Number)name).intValue();
+            index = ((Number) name).intValue();
         }
         if (index > -1) {
             if (!this.isSetChain(context)) {
@@ -85,7 +86,12 @@ implements PropertyAccessor {
             }
             Object value = null;
             if (list.size() > index) {
-                value = list.get(index);
+                try {
+                    value = processObject(context, list, list.get(index));
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new OgnlException(e.getMessage(), e);
+                }
+
                 Object clsObj = null;
                 if (isnullInited) {
                     clsObj = this.getParameterizedType(context, level, 0);
@@ -104,7 +110,7 @@ implements PropertyAccessor {
                     }
                     throw new OgnlException("Could not determine type of the List");
                 }
-                Class cls = (Class)clsObj;
+                Class cls = (Class) clsObj;
                 try {
                     value = this.createProperObject(context, cls, cls.getComponentType());
                     if (cls.isArray()) {
@@ -112,8 +118,7 @@ implements PropertyAccessor {
                     }
                     list.set(index, value);
                     return value;
-                }
-                catch (IllegalAccessException | InstantiationException e) {
+                } catch (IllegalAccessException | InstantiationException e) {
                     e.printStackTrace();
                     return null;
                 }
@@ -136,7 +141,7 @@ implements PropertyAccessor {
                 }
                 throw new OgnlException("Could not determine type of the List");
             }
-            Class cls = (Class)clsObj;
+            Class cls = (Class) clsObj;
             try {
                 value = this.createProperObject(context, cls, cls.getComponentType());
                 if (cls.isArray()) {
@@ -144,8 +149,7 @@ implements PropertyAccessor {
                 }
                 list.set(index, value);
                 return value;
-            }
-            catch (IllegalAccessException | InstantiationException e) {
+            } catch (IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
                 return null;
             }
@@ -155,15 +159,15 @@ implements PropertyAccessor {
 
     @Override
     public void setProperty(OgnlContext context, Object target, Object name, Object value) throws OgnlException {
-        if (name instanceof String && !((String)name).contains("$")) {
+        if (name instanceof String && !((String) name).contains("$")) {
             super.setProperty(context, target, name, value);
             return;
         }
         this.incIndex(context);
-        List list = (List)target;
+        List list = (List) target;
         boolean isExpanded = this.isExpanded(context);
         if (name instanceof Number) {
-            int index = ((Number)name).intValue();
+            int index = ((Number) name).intValue();
             if (list.size() > index) {
                 list.set(index, value);
                 return;
@@ -179,7 +183,7 @@ implements PropertyAccessor {
         }
         if (name instanceof DynamicSubscript) {
             int len = list.size();
-            switch (((DynamicSubscript)name).getFlag()) {
+            switch (((DynamicSubscript) name).getFlag()) {
                 case 0: {
                     if (len > 0) {
                         list.set(0, value);
@@ -218,7 +222,7 @@ implements PropertyAccessor {
                         throw new OgnlException("Value must be a collection");
                     }
                     list.clear();
-                    list.addAll((Collection)value);
+                    list.addAll((Collection) value);
                     return;
                 }
             }

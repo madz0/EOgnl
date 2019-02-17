@@ -50,64 +50,42 @@ implements PropertyAccessor {
                     this.shiftGenericParameters(context, level);
                     return target;
                 }
-                result = map.get(name);
-                Object clsObj = this.getParameterizedType(context, level, 1);
-                if (this.isNullInited(context) && result == null) {
-                    if (clsObj == null) {
-                        if (this.isUnknownInited(context)) {
-                            result = new Object();
-                            map.put(name, result);
-                            return result;
-                        }
-                        throw new OgnlException("Could not determine type of the Map");
-                    }
-                    Class cls = (Class)clsObj;
-                    try {
-                        result = this.createProperObject(context, cls, cls.getComponentType());
-                        if (cls.isArray()) {
-                            this.keepArraySource(context, target, (String)name, level);
-                        }
-                        map.put(name, result);
-                        return result;
-                    }
-                    catch (IllegalAccessException | InstantiationException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                }
-                if (result != null && result.getClass().isArray()) {
-                    this.keepArraySource(context, target, (String)name, level);
-                }
+                result = m(context, map, name, level);
             }
         } else {
-            result = map.get(name);
-            Object clsObj = this.getParameterizedType(context, level, 1);
-            if (this.isNullInited(context) && result == null) {
-                if (clsObj == null) {
-                    if (this.isUnknownInited(context)) {
-                        result = new Object();
-                        map.put(name, result);
-                        return result;
-                    }
-                    throw new OgnlException("Could not determine type of the Map");
-                }
-                Class cls = (Class)clsObj;
-                try {
-                    result = this.createProperObject(context, cls, cls.getComponentType());
-                    if (cls.isArray()) {
-                        this.keepArraySource(context, target, (String)name, level);
-                    }
+            result = m(context, map, name, level);
+        }
+        return result;
+    }
+
+    private Object m(OgnlContext context, Map map, Object name, int level) throws OgnlException {
+        Object result = map.get(name);
+        Object clsObj = this.getParameterizedType(context, level, 1);
+        if (this.isNullInited(context) && result == null) {
+            if (clsObj == null) {
+                if (this.isUnknownInited(context)) {
+                    result = new Object();
                     map.put(name, result);
                     return result;
                 }
-                catch (IllegalAccessException | InstantiationException e) {
-                    e.printStackTrace();
-                    return null;
+                throw new OgnlException("Could not determine type of the Map");
+            }
+            Class cls = (Class)clsObj;
+            try {
+                result = this.createProperObject(context, cls, cls.getComponentType());
+                if (cls.isArray()) {
+                    this.keepArraySource(context, map, (String)name, level);
                 }
+                map.put(name, result);
+                return result;
             }
-            if (result != null && result.getClass().isArray()) {
-                this.keepArraySource(context, target, (String)name, level);
+            catch (IllegalAccessException | InstantiationException e) {
+                e.printStackTrace();
+                return null;
             }
+        }
+        if (result != null && result.getClass().isArray()) {
+            this.keepArraySource(context, map, (String)name, level);
         }
         return result;
     }

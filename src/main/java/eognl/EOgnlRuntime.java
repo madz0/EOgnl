@@ -32,6 +32,8 @@ import eognl.PropertyAccessor;
 import eognl.TypeConverter;
 import eognl.enhance.ExpressionCompiler;
 import eognl.enhance.OgnlExpressionCompiler;
+import eognl.exenhance.DefaultObjectConstructor;
+import eognl.exenhance.ObjectConstructor;
 import eognl.exinternal.util.MutableInt;
 import eognl.internal.CacheException;
 import eognl.internal.entry.DeclaredMethodCacheEntry;
@@ -1214,7 +1216,7 @@ public class EOgnlRuntime {
     }
 
     public static boolean isSetChain(OgnlContext context) {
-        return context.get(OgnlContext.EXPRESSION_SET) != null;
+        return context.containsKey(OgnlContext.EXPRESSION_SET);
     }
 
     public static boolean isNullInited(OgnlContext context) {
@@ -1247,37 +1249,8 @@ public class EOgnlRuntime {
 
     @Deprecated
     public static Object createProperObject(Class<?> cls, Class<?> componentType) throws InstantiationException, IllegalAccessException {
-        if (List.class.isAssignableFrom(cls)) {
-            if (LinkedList.class.isAssignableFrom(cls)) {
-                return new LinkedList();
-            }
-            return new ArrayList();
-        }
-        if (Map.class.isAssignableFrom(cls)) {
-            if (LinkedHashMap.class.isAssignableFrom(cls)) {
-                return new LinkedHashMap();
-            }
-            if (TreeMap.class.isAssignableFrom(cls)) {
-                return new TreeMap();
-            }
-            return new HashMap();
-        }
-        if (ConcurrentMap.class.isAssignableFrom(cls)) {
-            return new ConcurrentHashMap();
-        }
-        if (Set.class.isAssignableFrom(cls)) {
-            if (LinkedHashSet.class.isAssignableFrom(cls)) {
-                return new LinkedHashSet();
-            }
-            return new HashSet();
-        }
-        if (cls.isArray()) {
-            return Array.newInstance(componentType, 1);
-        }
-        if (EOgnlRuntime.isPrimitiveOrWrapper(cls)) {
-            return EOgnlRuntime.getPrimitivesDefult(cls);
-        }
-        return cls.newInstance();
+        ObjectConstructor objectConstructor = new DefaultObjectConstructor();
+        return objectConstructor.createObject(cls, componentType);
     }
 
     public static boolean isPrimitiveOrWrapper(Type type) {
