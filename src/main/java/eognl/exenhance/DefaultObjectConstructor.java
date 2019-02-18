@@ -40,10 +40,11 @@ public class DefaultObjectConstructor implements ObjectConstructor {
             return new ConcurrentHashMap();
         }
         if (Set.class.isAssignableFrom(cls)) {
-            if (LinkedHashSet.class.isAssignableFrom(cls)) {
+            /*if (LinkedHashSet.class.isAssignableFrom(cls)) {
                 return new LinkedHashSet();
             }
-            return new HashSet();
+            return new HashSet();*/
+            return new LinkedHashSet();
         }
         if (cls.isArray()) {
             return Array.newInstance(componentType, 1);

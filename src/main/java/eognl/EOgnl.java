@@ -4,6 +4,7 @@
 package eognl;
 
 import java.io.StringReader;
+import java.util.HashMap;
 
 import eognl.enhance.ExpressionAccessor;
 import eognl.exinternal.util.MutableInt;
@@ -80,15 +81,16 @@ public abstract class EOgnl {
             //TODO I don't remember why this should be 5 more!
             for (int i = 0; i < mInt.get() + 5; ++i) {
                 key = new StringBuffer();
-                key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(i));
+                key.append(OgnlContext.GENERIC_PREFIX_KEY).append(i);
                 result.remove(key.toString());
                 key = new StringBuffer();
-                key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(String.valueOf(i));
+                key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(i);
                 result.remove(key.toString());
             }
         }
         result.put(OgnlContext.CURRENT_INDEX_KEY, (Object)new MutableInt());
         result.remove(OgnlContext.EXPANDED_ARRAY_KEY);
+        result.put(OgnlContext.OBJECT_GETTER_ANNOTATION_KEY, new HashMap<>());
         Object root_param_info = context.get(OgnlContext.PARAMETERIZED_ROOT_TYPE_KEY);
         if (root_param_info != null) {
             StringBuffer key = new StringBuffer();

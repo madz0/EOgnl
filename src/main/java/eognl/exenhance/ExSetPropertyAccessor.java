@@ -8,8 +8,8 @@ import eognl.OgnlContext;
 import eognl.OgnlException;
 import eognl.PropertyAccessor;
 import eognl.exenhance.ExObjectPropertyAccessor;
-import java.util.Iterator;
-import java.util.Set;
+
+import java.util.*;
 
 public class ExSetPropertyAccessor
 extends ExObjectPropertyAccessor
@@ -39,6 +39,11 @@ implements PropertyAccessor {
                 result = super.getProperty(context, target, name);
             }
             return result;
+        }
+        else if (name instanceof Number) {
+            this.decIndex(context);
+            ExListPropertyAccessor exListPropertyAccessor = new ExListPropertyAccessor();
+            return exListPropertyAccessor.getProperty(context, target, name);
         }
         if (level == 1 && this.isFirstUnknownIgnored(context) && target.getClass().isAssignableFrom(context.getRoot().getClass())) {
             this.shiftGenericParameters(context, level);

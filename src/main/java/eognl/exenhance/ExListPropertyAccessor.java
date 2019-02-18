@@ -3,17 +3,9 @@
  */
 package eognl.exenhance;
 
-import eognl.DynamicSubscript;
-import eognl.NoSuchPropertyException;
-import eognl.OgnlContext;
-import eognl.OgnlException;
-import eognl.PropertyAccessor;
-import eognl.exenhance.ExObjectPropertyAccessor;
+import eognl.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class ExListPropertyAccessor
         extends ExObjectPropertyAccessor
@@ -25,7 +17,14 @@ public class ExListPropertyAccessor
             this.shiftGenericParameters(context, level);
             return target;
         }
-        List list = (List) target;
+        List list = null;
+        if(target instanceof List) {
+            list = (List) target;
+        }
+        else {
+            list = new ArrayList((Set) target);
+        }
+
         if (name instanceof String) {
             Object result = null;
             if ("size".equals(name)) {
@@ -86,12 +85,7 @@ public class ExListPropertyAccessor
             }
             Object value = null;
             if (list.size() > index) {
-                try {
-                    value = processObject(context, list, list.get(index));
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new OgnlException(e.getMessage(), e);
-                }
-
+                value = processObject(context, target, list.get(index), getCurrentAnnotations(context));
                 Object clsObj = null;
                 if (isnullInited) {
                     clsObj = this.getParameterizedType(context, level, 0);
@@ -100,28 +94,11 @@ public class ExListPropertyAccessor
                     this.keepArraySource(context, target, index, level);
                 }
                 if (value != null || !isnullInited) {
-                    return value;
-                }
-                if (clsObj == null) {
-                    if (this.isUnknownInited(context)) {
-                        value = new Object();
-                        list.set(index, value);
-                        return value;
-                    }
-                    throw new OgnlException("Could not determine type of the List");
-                }
-                Class cls = (Class) clsObj;
-                try {
-                    value = this.createProperObject(context, cls, cls.getComponentType());
-                    if (cls.isArray()) {
-                        this.keepArraySource(context, target, index, level);
-                    }
                     list.set(index, value);
+                    updateTargetIfSet(target, list);
                     return value;
-                } catch (IllegalAccessException | InstantiationException e) {
-                    e.printStackTrace();
-                    return null;
                 }
+                return createResultForNullValue(context, clsObj, target, list, index, level);
             }
             if (!isExpanded) {
                 return null;
@@ -132,27 +109,7 @@ public class ExListPropertyAccessor
             if (!isnullInited) {
                 return null;
             }
-            Object clsObj = this.getParameterizedType(context, level, 0);
-            if (clsObj == null) {
-                if (this.isUnknownInited(context)) {
-                    value = new Object();
-                    list.set(index, value);
-                    return value;
-                }
-                throw new OgnlException("Could not determine type of the List");
-            }
-            Class cls = (Class) clsObj;
-            try {
-                value = this.createProperObject(context, cls, cls.getComponentType());
-                if (cls.isArray()) {
-                    this.keepArraySource(context, target, index, level);
-                }
-                list.set(index, value);
-                return value;
-            } catch (IllegalAccessException | InstantiationException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return createResultForNullValue(context, this.getParameterizedType(context, level, 0), target, list, index, level);
         }
         return null;
     }
@@ -234,6 +191,43 @@ public class ExListPropertyAccessor
     @Override
     public int getGenericArgumentsCount() {
         return 1;
+    }
+
+    private Object createResult(OgnlContext context, Class cls, Object target, List list, int index, int level) {
+        try {
+            Object value = this.createProperObject(context, cls, cls.getComponentType());
+            if (cls.isArray()) {
+                this.keepArraySource(context, list, index, level);
+            }
+            list.set(index, value);
+            updateTargetIfSet(target, list);
+            return value;
+        } catch (IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private Object createResultForNullValue(OgnlContext context, Object clsObj, Object target, List list, int index,
+                                            int level) throws OgnlException {
+        if (clsObj == null) {
+            if (this.isUnknownInited(context)) {
+                Object value = new Object();
+                list.set(index, value);
+                updateTargetIfSet(target, list);
+                return value;
+            }
+            throw new OgnlException("Could not determine type of the List");
+        }
+        return createResult(context, (Class) clsObj, target, list, index, level);
+    }
+
+    private void updateTargetIfSet(Object target, List list) {
+        if(target instanceof Set) {
+            Set set = (Set) target;
+            set.clear();
+            set.addAll(list);
+        }
     }
 }
 

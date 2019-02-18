@@ -50,7 +50,8 @@ implements Map<String, Object> {
     public static final String ALWAYS_IGNORE_FIRST_KEY = "AlwaAa^Ay)i)zIgG%boZElA";
     public static final String UNKNOWN_TO_LITERAL_KEY = "UuUkwWn2LlLte*(9l";
     public static final String CAST_PRIMITIVES_KEY = "H^7yCa3TtH***";
-    public static final String OBJECT_CONSTRUCTOR_KEY = OgnlContext.class.getName()+"_OBJECT_CONSTRUCTOR_KEY"; 
+    public static final String OBJECT_CONSTRUCTOR_KEY = OgnlContext.class.getName()+"_OBJECT_CONSTRUCTOR_KEY";
+    public static final String OBJECT_GETTER_ANNOTATION_KEY = OgnlContext.class.getName()+"_OBJECT_GETTER_ANNOTATION_KEY";
     public static final String CONTEXT_CONTEXT_KEY = "context";
     public static final String ROOT_CONTEXT_KEY = "root";
     public static final String THIS_CONTEXT_KEY = "this";

@@ -9,15 +9,22 @@ import eognl.OgnlContext;
 import eognl.OgnlException;
 import eognl.PropertyAccessor;
 import eognl.exinternal.util.ArraySourceContainer;
-import org.apache.commons.lang3.tuple.Pair;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.text.Annotation;
+import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static eognl.OgnlContext.OBJECT_GETTER_ANNOTATION_KEY;
 
 public class ExObjectPropertyAccessor
         extends ObjectPropertyAccessor
@@ -54,6 +61,7 @@ public class ExObjectPropertyAccessor
                 return super.getProperty(context, target, name);
             }
             Object value = this.getPossibleProperty(context, target, (String) name);
+            Map annotations = getOrUpdateAnnotationsOf(context, target, (String) name);
             Type[] generics = this.getPossibleSetGenericTypes(context, target, (String) name);
             if (generics != null) {
                 this.checkSetGenericTypes(context, generics, level);
@@ -72,10 +80,12 @@ public class ExObjectPropertyAccessor
                 this.keepArraySource(context, target, (String) name, level);
             }
             if (value != null) {
-                return value;
+                return processObject(context, target, value, annotations);
             }
             value = this.createProperObject(context, cls, componentType);
-            if (this.setPossibleProperty(context, target, (String) name, value) != EOgnlRuntime.NotFound) return value;
+            if (this.setPossibleProperty(context, target, (String) name, value) != EOgnlRuntime.NotFound) {
+                return value;
+            }
             return generateException(target, name, value);
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,7 +149,7 @@ public class ExObjectPropertyAccessor
         return EOgnlRuntime.isUnknownIsLiteral(context);
     }
 
-    public void checkSetGenericTypes(OgnlContext context, Type[] genericTypes, int level) {
+    void checkSetGenericTypes(OgnlContext context, Type[] genericTypes, int level) {
         if (genericTypes.length == 0) {
             return;
         }
@@ -150,7 +160,7 @@ public class ExObjectPropertyAccessor
                 return;
             }
             StringBuffer key = new StringBuffer();
-            key.append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level + 1));
+            key.append(OgnlContext.GENERIC_PREFIX_KEY).append(level + genericTypes.length);
             context.put(key.toString(), (Object) genericTypes);
         } else if (genericTypes[0] instanceof GenericArrayType) {
             GenericArrayType genericArrayType = (GenericArrayType) genericTypes[0];
@@ -180,11 +190,12 @@ public class ExObjectPropertyAccessor
         return ((ObjectConstructor) context.get(OgnlContext.OBJECT_CONSTRUCTOR_KEY)).createObject(cls, componentType);
     }
 
-    public Object processObject(OgnlContext context, Object objectGetter, Object object)
-            throws InstantiationException, IllegalAccessException {
-        Pair<Object, Map<Class, Object>> m = ((Map<Object, Pair<Object, Map<Class, Object>>>)
-                context.get(OgnlContext.OBJECT_CONSTRUCTOR_KEY)).get(objectGetter);
-        return ((ObjectConstructor) context.get(OgnlContext.OBJECT_CONSTRUCTOR_KEY)).processObject(m.getRight(), m.getLeft(), object);
+    public Object processObject(OgnlContext context, Object objectGetter, Object object, Map<Class, Object> annotationMap) {
+        try {
+            return ((ObjectConstructor) context.get(OgnlContext.OBJECT_CONSTRUCTOR_KEY)).processObject(annotationMap, objectGetter, object);
+        } catch (InstantiationException | IllegalAccessException e) {
+            return null;
+        }
     }
 
     public void keepArraySource(OgnlContext context, Object target, String propertyName, int level) {
@@ -230,7 +241,7 @@ public class ExObjectPropertyAccessor
         if (this.getGenericArgumentsCount() < 1 || paramIndex < 0) {
             return null;
         }
-        StringBuffer key = new StringBuffer().append(OgnlContext.GENERIC_PREFIX_KEY).append(String.valueOf(level));
+        StringBuffer key = new StringBuffer().append(OgnlContext.GENERIC_PREFIX_KEY).append(level);
         Type[] genericParameterTypes = (Type[]) context.get(key.toString());
         if (genericParameterTypes == null || genericParameterTypes.length < this.getGenericArgumentsCount() || genericParameterTypes.length <= paramIndex) {
             return null;
@@ -256,7 +267,7 @@ public class ExObjectPropertyAccessor
         return myCls;
     }
 
-    public void keepArraySource(OgnlContext context, Object target, int index, int level) {
+    void keepArraySource(OgnlContext context, Object target, int index, int level) {
         StringBuffer key = new StringBuffer();
         key.append(OgnlContext.ARRAR_SOURCE_PREFIX_KEY).append(String.valueOf(level + 1));
         ArraySourceContainer a = new ArraySourceContainer();
@@ -265,5 +276,22 @@ public class ExObjectPropertyAccessor
         context.put(key.toString(), a);
     }
 
+    Map getOrUpdateAnnotationsOf(OgnlContext context, Object parentObject, String getter) throws NoSuchFieldException {
+        Map annotationsMap = (Map) context.get(OBJECT_GETTER_ANNOTATION_KEY);
+        Map annotations = (Map)annotationsMap.get(parentObject.toString()+getter);
+        if(annotations == null) {
+            Annotation[] annotationsArr = parentObject.getClass().getDeclaredField(getter).getAnnotations();
+            if (annotationsArr != null) {
+                annotations = Stream.of(annotationsArr).collect(Collectors.toMap(x -> x.annotationType(), x -> x));
+                annotationsMap.put(parentObject, annotations);
+            }
+        }
+        annotationsMap.put(OBJECT_GETTER_ANNOTATION_KEY, annotations);
+        return annotations;
+    }
+
+    Map getCurrentAnnotations(OgnlContext context) {
+        return (Map)((Map) context.get(OBJECT_GETTER_ANNOTATION_KEY)).get(OBJECT_GETTER_ANNOTATION_KEY);
+    }
 }
 

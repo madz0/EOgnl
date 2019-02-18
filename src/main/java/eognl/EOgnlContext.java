@@ -6,6 +6,7 @@ package eognl;
 import java.lang.reflect.Member;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 
 import eognl.exenhance.DefaultObjectConstructor;
 import eognl.exenhance.ObjectConstructor;
@@ -54,7 +55,7 @@ public class EOgnlContext extends OgnlContext {
     }
     if (CONF_FLAGS != 0) {
       put(OBJECT_CONSTRUCTOR_KEY, new DefaultObjectConstructor());
-      put(OgnlContext.CURRENT_INDEX_KEY, (Object) new MutableInt());
+      put(CURRENT_INDEX_KEY, (Object) new MutableInt());
       cache.addEOgnlPropertyAccessors();
     } else {
       cache.addOgnlPropertyAccessors();

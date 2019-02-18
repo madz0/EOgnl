@@ -3,12 +3,6 @@
  */
 package eognl;
 
-import eognl.NoSuchPropertyException;
-import eognl.ObjectPropertyAccessor;
-import eognl.OgnlContext;
-import eognl.OgnlException;
-import eognl.PropertyAccessor;
-import java.util.Iterator;
 import java.util.Set;
 
 public class SetPropertyAccessor

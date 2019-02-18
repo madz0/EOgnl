@@ -81,6 +81,8 @@ implements PropertyAccessor {
                         value = Array.get(target, i);
                         this.setExpandedArray(context, target, i, level, false);
                         if (value != null || !nullInited) {
+                            value = processObject(context, target, value, getCurrentAnnotations(context));
+                            Array.set(target, i, value);
                             return value;
                         }
                         Class<?> cls = target.getClass().getComponentType();

@@ -8,14 +8,12 @@ import eognl.Node;
 import eognl.OgnlContext;
 import eognl.OgnlException;
 import eognl.PropertyAccessor;
-import eognl.exenhance.ExObjectPropertyAccessor;
-import java.util.Collection;
+
 import java.util.Map;
-import java.util.Set;
 
 public class ExMapPropertyAccessor
-extends ExObjectPropertyAccessor
-implements PropertyAccessor {
+        extends ExObjectPropertyAccessor
+        implements PropertyAccessor {
     @Override
     public Object getProperty(OgnlContext context, Object target, Object name) throws OgnlException {
         Object result;
@@ -24,7 +22,7 @@ implements PropertyAccessor {
             this.shiftGenericParameters(context, level);
             return target;
         }
-        Map map = (Map)target;
+        Map map = (Map) target;
         Node currentNode = context.getCurrentNode().jjtGetParent();
         boolean indexedAccess = false;
         if (currentNode == null) {
@@ -34,7 +32,7 @@ implements PropertyAccessor {
             currentNode = currentNode.jjtGetParent();
         }
         if (currentNode instanceof ASTProperty) {
-            indexedAccess = ((ASTProperty)currentNode).isIndexedAccess();
+            indexedAccess = ((ASTProperty) currentNode).isIndexedAccess();
         }
         if (name instanceof String && !indexedAccess) {
             if ("size".equals(name)) {
@@ -50,15 +48,15 @@ implements PropertyAccessor {
                     this.shiftGenericParameters(context, level);
                     return target;
                 }
-                result = m(context, map, name, level);
+                result = prepareResult(context, map, name, level);
             }
         } else {
-            result = m(context, map, name, level);
+            result = prepareResult(context, map, name, level);
         }
         return result;
     }
 
-    private Object m(OgnlContext context, Map map, Object name, int level) throws OgnlException {
+    private Object prepareResult(OgnlContext context, Map map, Object name, int level) throws OgnlException {
         Object result = map.get(name);
         Object clsObj = this.getParameterizedType(context, level, 1);
         if (this.isNullInited(context) && result == null) {
@@ -70,22 +68,25 @@ implements PropertyAccessor {
                 }
                 throw new OgnlException("Could not determine type of the Map");
             }
-            Class cls = (Class)clsObj;
+            Class cls = (Class) clsObj;
             try {
                 result = this.createProperObject(context, cls, cls.getComponentType());
                 if (cls.isArray()) {
-                    this.keepArraySource(context, map, (String)name, level);
+                    this.keepArraySource(context, map, (String) name, level);
                 }
                 map.put(name, result);
                 return result;
-            }
-            catch (IllegalAccessException | InstantiationException e) {
+            } catch (IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
                 return null;
             }
         }
-        if (result != null && result.getClass().isArray()) {
-            this.keepArraySource(context, map, (String)name, level);
+        if (result != null) {
+            result = processObject(context, map, result, getCurrentAnnotations(context));
+            map.put(name, result);
+            if (result != null && result.getClass().isArray()) {
+                this.keepArraySource(context, map, (String) name, level);
+            }
         }
         return result;
     }
@@ -93,7 +94,7 @@ implements PropertyAccessor {
     @Override
     public void setProperty(OgnlContext context, Object target, Object name, Object value) throws OgnlException {
         this.incIndex(context);
-        Map map = (Map)target;
+        Map map = (Map) target;
         map.put(name, value);
     }
 
